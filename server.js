@@ -3,8 +3,7 @@ require("dotenv").config();
 const cors = require("cors");
 require("./config/database.js")
 
-const doctorRouter = require('./routes/doctorRouter')
-const planRouter = require('./routes/planRouter')
+const userRouter = require('./routes/userRouter')
 const app = express();
 
 app.use(express.json())
@@ -20,9 +19,8 @@ app.get("/", (req, res) => {
     res.send("servidor creado")
 });
 
-app.use('/api', doctorRouter)
-app.use('/api', planRouter)
+app.use('/api/',userRouter)
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 7000;
 app.set("port", PORT);
 app.listen(PORT, () => console.log("servidor corriendo en el puerto: " + PORT));

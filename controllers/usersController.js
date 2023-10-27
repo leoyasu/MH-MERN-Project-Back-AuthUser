@@ -1,54 +1,52 @@
 const Users = require('../models/userModel')
+const bcryptjs = require('bcryptjs')
 
 const userController = {
-
-
-    singUp: async (req, res) => {
+    signUp: async (req, res) => {
         const {fullName, email, password, from, aplication} = req.body.userData;
+        const hashedPassword = bcryptjs.hashSync(password,10);
+
         try {
-            const foundUsers = await Users.find()
-            return res.status(200).json({ sucess: true, message: "All Users", user: foundUsers })
+            const userExist = await Users.findOne({email})
+
+            if(userExist){
+                if(userExist.from.indexOf(from) !== -1){
+                    res.json({
+                        sucess: false,
+                        from: {from},
+                        message: "El Sign Up ya fue realizado mediante "+from+", por favor realizar Sign in"
+                    })
+                } else {
+                    userExist.from.push(from)
+                    userExist.password.push(hashedPassword)
+                    await userExist.save()
+                    res.json({
+                        sucess: true,
+                        from: from,
+                        message: "Se agregó "+from+" como medio a tus metodos para realizar sign in"
+                    })
+                }
+            } else{
+                const newUser = new Users({
+                    fullName,
+                    email,
+                    password: [hashedPassword],
+                    from: [from],
+                    aplication
+                }) 
+
+                await newUser.save()
+                res.json({
+                    sucess: true,
+                    from: from,
+                    message: "El usuario ha sido creado y agregamos como metodo de logeo: "+from
+                })
+            }
         } catch (error) {
-            return res.status(500).json({ sucess: false })
+            console.log(error)
+            res.json({ sucess: false, message:"Algo ha salido mal"})
         }
     },
-    // getDoctor: async (req, res) => {
-    //     try {
-    //         const foundDoctor = await Doctors.findOne({ _id: req.params.id })
-    //         return res.status(200).json({ sucess: true, doctor: foundDoctor, message: "The doctor has been found" })
-    //     } catch (error) {
-    //         return res.status(500).json({ sucess: false })
-    //     }
-    // },
-    // addDoctors: async (req, res) => {
-
-    //     try {
-    //         const newDoctors = await Doctors.insertMany(req.body);
-    //         return res.status(201).json({
-    //             success: true,
-    //             doctors: newDoctors,
-    //             message: `${newDoctors.length} doctor(s) have been created`
-    //         })
-    //     } catch (error) {
-    //         return res.status(500).json({ sucess: false })
-    //     }
-    // },
-    // updateDoctor: async (req, res) => {
-    //     try {
-    //         const updatedDoctor = await Doctors.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true })
-    //         return res.status(200).json({ sucess: true, doctor: updatedDoctor, message: "The doctor has been updated" })
-    //     } catch (error) {
-    //         return res.status(500).json({ sucess: false })
-    //     }
-    // },
-    // deleteDoctor: async (req, res) => {
-    //     try {
-    //         const deletedDoctor = await Doctors.findOneAndRemove({ _id: req.params.id })
-    //         return res.status(200).json({ sucess: true, message: "The doctor has been removed" })
-    //     } catch (error) {
-    //         return res.status(500).json({ sucess: false })
-    //     }
-    // }
 }
 
-module.exports = doctorController
+module.exports = userController
