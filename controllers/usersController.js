@@ -3,7 +3,6 @@ const bcryptjs = require('bcryptjs')
 
 const userController = {
     signUp: async (req, res) => {
-        console.log(req)
         const { fullName, email, password, from, aplication } = req.body.userData;
         const hashedPassword = bcryptjs.hashSync(password, 10);
         try {
