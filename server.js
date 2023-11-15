@@ -4,6 +4,7 @@ const cors = require("cors");
 require("./config/database.js")
 
 const userRouter = require('./routes/userRouter')
+const passport=require("passport")
 const app = express();
 
 app.use(express.json())
@@ -15,6 +16,7 @@ app.use(
     })
 );
 
+app.use(passport.initialize())
 app.get("/", (req, res) => {
     res.send("servidor creado")
 });

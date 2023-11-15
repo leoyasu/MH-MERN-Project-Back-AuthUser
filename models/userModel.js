@@ -5,7 +5,12 @@ const userSchema =  new mongoose.Schema({
     email:{type:String, required:true},
     password:[{type:String, required:true}], 
     from:{type:Array},
-    aplication:{type:String}   
+    aplication:{type:String} ,
+    //google mail
+    uniqueString:{type:String,require:true},
+    emailVerify:{type:Boolean,require:true}
+    
+
 })
 
 const User = mongoose.model('users', userSchema)
