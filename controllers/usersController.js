@@ -3,7 +3,7 @@ const bcryptjs = require('bcryptjs')
 
 const userController = {
     signUp: async (req, res) => {
-        const { fullName, email, password, from, aplication } = req.body.userData;
+        const { fullName, email, password, from, application } = req.body.userData;
         const hashedPassword = bcryptjs.hashSync(password, 10);
         try {
             const userExist = await Users.findOne({ email })
@@ -31,7 +31,7 @@ const userController = {
                     email,
                     password: [hashedPassword],
                     from: [from],
-                    aplication
+                    application
                 })
 
                 await newUser.save()

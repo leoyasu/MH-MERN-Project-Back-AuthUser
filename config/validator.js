@@ -1,4 +1,12 @@
 const joi = require("joi");
+
+const getDynamicPasswordSchema = (source) => {
+    if (source === 'google') {
+        return joi.string().min(8).max(60);
+    }
+    return joi.string().min(8).max(30).pattern(new RegExp(/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/));
+};
+
 const userValidator = {
 
     validatorSignUp: (req, res, next) => {
@@ -10,10 +18,7 @@ const userValidator = {
                 .messages({
                     'string.email': 'Wrong Email format'
                 }),
-            password: joi.string()
-                .min(8)
-                .max(30)
-                .pattern(new RegExp(/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/))
+            password: getDynamicPasswordSchema(req.body.userData.from)
                 .required()
                 .messages({
                     'string.min': 'The password must have at least 8 characters.',
@@ -36,7 +41,7 @@ const userValidator = {
         next()
     },
 
-validatorSignIn : (req, res, next) => {
+    validatorSignIn: (req, res, next) => {
         const schema = joi.object({
             email: joi.string()
                 .email({ minDomainSegments: 2 })
