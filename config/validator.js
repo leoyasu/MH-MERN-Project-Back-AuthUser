@@ -49,10 +49,7 @@ const userValidator = {
                 .messages({
                     'string.email': 'Wrong Email format'
                 }),
-            password: joi.string()
-                .min(8)
-                .max(30)
-                .pattern(new RegExp(/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/))
+            password: getDynamicPasswordSchema(req.body.formData.from)
                 .required()
                 .messages({
                     'string.min': 'The password must have at least 8 characters.',
