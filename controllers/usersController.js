@@ -4,6 +4,7 @@ const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const { google } = require('googleapis')
 const Oauth2 = google.auth.OAuth2
+const jwt = require('jsonwebtoken')
 
 const sendEmail = async (email, uniqueString) => {
 
@@ -104,7 +105,7 @@ const userController = {
                     emailVerify,
                     uniqueString
                 })
-
+                
                 if (from === 'sign-up-form') {
                     await newUser.save()
 
@@ -131,10 +132,11 @@ const userController = {
         }
     },
     signIn: async (req, res) => {
-        const { email, password, from } = req.body.formData
+        const { email, password, from, application} = req.body.formData
 
         try {
             const user = await Users.findOne({ email })
+
             const matchPassword = user.password.filter(pass => bcryptjs.compareSync(password, pass))
             if (!user) {
                 res.json({
@@ -148,14 +150,18 @@ const userController = {
                     fullName: user.fullName,
                     email: user.email,
                     from: user.from,
+                    application: user.application
                 }
                 if (from !== "sign-up-form") {
                     if (matchPassword.length > 0) {
+
+                        const token = jwt.sign({...dataUser},process.env.SECRET_TOKEN,{expiresIn:"1h"});
+
                         res.json({
                             success: true,
                             from: from,
                             message: "Sign In successful, welcome again: " + dataUser.fullName,
-                            response: dataUser
+                            response: {token,dataUser}
                         })
                     } else {
                         const hashedPassword = bcryptjs.hashSync(password, 10);
@@ -172,11 +178,12 @@ const userController = {
                     }
                 } else {
                     if (matchPassword.length > 0) {
+                        const token = jwt.sign({...dataUser},process.env.SECRET_TOKEN,{expiresIn:"1h"});
                         res.json({
                             success: true,
                             from: from,
                             message: "Sign In successful, welcome again: " + dataUser.fullName,
-                            response: dataUser
+                            response: {token, dataUser}
                         })
                     } else {
                         res.json({
